@@ -1,6 +1,8 @@
 #include "solve_5pts.h"
-#include <sophus/se3.h>
-#include <sophus/so3.h>
+#include <sophus/se3.hpp>
+#include <sophus/so3.hpp>
+#include <Eigen/Core>
+#include <opencv2/core/eigen.hpp>
 using Sophus::SE3;
 using Sophus::SO3;
 
@@ -253,9 +255,13 @@ bool MotionEstimator::solveRelativeRT_PNP(const vector<pair<Vector3d, Vector3d>>
     cv::solvePnPRansac(lll, rr, cameraMatrix, cv::Mat(), rvec, tvec, false, 100, 1.0/460, 0.99,
                        inliersArr, cv::SOLVEPNP_ITERATIVE);//maybe don't need 100times
 
-
+    cv::Mat R;
+    cv::Rodrigues(rvec, R);
     Vector3d tran(tvec.at<double>(0, 0), tvec.at<double>(1, 0), tvec.at<double>(2, 0));
-    Matrix3d rota = SO3(rvec.at<double>(0, 0), rvec.at<double>(1, 0), rvec.at<double>(2, 0)).matrix();
+
+    Eigen::Matrix3d rota;
+    cv::cv2eigen(R, rota);
+//    Matrix3d rota = SO3(rvec.at<double>(0, 0), rvec.at<double>(1, 0), rvec.at<double>(2, 0)).matrix();
 
 //	Vector2d tp1,residualV;
 //	Vector3d tp23d;
